@@ -155,6 +155,7 @@ contract askbidpayable { using SafeMath for uint256 ;
        event annuity_matured(address contractaddress, uint payoutleft);
        event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
+       // to make these mods consistent
 
         modifier commissionisdue() {
             require (commissiondue(), "Cannot send commssion to platform if no sale event");
