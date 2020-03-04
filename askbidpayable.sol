@@ -2,7 +2,7 @@ pragma solidity >=0.4.22 <0.6.0;
 
 contract askbidpayable { using SafeMath for uint256 ;
 
-   //  Version 0.4.5- 03/04/2020 flattened.
+   //  Version 0.4.6- 03/04/2020 flattened.
 
     /*
 
@@ -10,28 +10,28 @@ contract askbidpayable { using SafeMath for uint256 ;
 
     ETH and denominations are treated as HBAR in Hedera's EVM version scVM
     global variables in solidity ie block.timestamp is the Hedera consensus timestamp
-    when executed via the scVM.
+    - other minor differences. - else porting almost seamless from chain to hashgraph.
 
     Parameters of the simple valid annuity trade contract. Times are either
     absolute unix timestamps (seconds since 1970-01-01)
-    or time periods in seconds.
 
-    C.Robinson - Trade ask/bid example contractr deploy to hedera hashgraph testnet
-
-    More of an Annuity than a annuity.. but.. an example of a immutable loaded instrument
+    C.Robinson - Trade ask/bid example contract
 
     ** No suicide of contract by owner - the annuity once created and even sold and empty- matured.. will remain for Audit purposes, immutable.
-    Done on Hedera with a autornew period and paying balance sufficient for legal statute for such a contract
+     on Hedera with a autornew period and paying balance sufficient for legal statute for such a contract
 
-    owner is initial deployer for this example and is 'asker' ie seller
+    owner is initial deployer for this example and is 'asker' ie first seller
 
-    contract is locked open upon delploy and subsequent loading with ETH above ask value,
-    for release for sale into the market, open to bids
+    trading platform treasury wallet - for commission receipt is entered upon deploy.
+
+    contract is locked open upon delploy and then subsequent loading with crypto above ask value,
+    for release for sale into the market, then open to bids
 
     Bidder is wallet/account dApp address of bidding entity.. who, what, when ..
 
-    A fixed annuity with monthly payouts for the monthly term. The payouts are drawn from the locked ETH balance
-    in the contract ETH amount, timestamp nd sale - held for public record and proof of bid and sale
+    A fixed annuity with monthly payouts for the term in years.
+    Payouts are drawn from the locked ETH balance.
+    Timestamp and sale - held for public record and proof of bid and sale
     transaction as public state held on ledger.
 
     This example demonstrates Bids with HARD value ie REAL currency of $ worth
@@ -47,25 +47,30 @@ contract askbidpayable { using SafeMath for uint256 ;
 
     **  note for security the payout to seller has to be withdrawn specifically from the annuity at their behest
     **  note for security the monthly payouts have to be withdraw by the new owner on or after each payout period passing.
+    but not inclusive of the first months new payout immediate upon sale ie successful bid.
 
-    Events are triggered and the DApp front end will be able to send msg/ indicate that payouts are ready for withdrawal.
+    Events are triggered and the DApp front end will be able to send msg/ indicate
+    various statues.  e.g. that Bid was successful and Ask price value ready for withdrawal.
 
     The difference held in the balance Net value - bidder price, in the contract is the premium that the
-    new owner receives on its regular new monthly payouts.
+    new owner receives on its regular new monthly payouts, less the % commission of the platform.
 
-    ** Of course no sane bidder will bid on a annuity at or above its net present value - so the Ask price set by seller
-    will have to be substantially lower than the present value held, in order to attract bidders
+    ** Of course no sane bidder, for this simple example,  will bid on a annuity at or above its net present value
+    so the Ask price set by seller will have to be substantially lower than the present value held, in order to attract bidders
 
-    Any bidder ie account, calling the contract can send in any ETH bid value at any time as long as annuity is not sold state status
-    If less than the ask then bid is returned, but others can publicly see the last higest value bid by any other account.
+    Any bidder account, calling the contract WILL have to send in hard crypto as bid value(no promises of funds)
+    - at any time as long as annuity is not sold state status
+    If less than the ask then bid is returned, but others can publicly see the last higest value bid by any other
+    account and the account that was the bidder - for market transparency.
 
 
      Only Owner can recind the sale (by LOCKING it for sale.. but not locking the annuity for payout, obviously)
 
      Status state locking is the most powerful switch of contracts.
-     ie this is a State machine with status of the annuity.. boolean locking.
 
-     The New owner can then sell on the contract on existing logic terms by releasing the lock
+     ie this is a State machine  - boolean locking.
+
+     The new owner can then subsequently etc, sell on the contract on existing payout terms on the new balance by releasing the lock
      via markforsale method.
 
      There is no time limit .. once it is deployed it is OPEN until FILLED (sold) or
@@ -77,8 +82,8 @@ contract askbidpayable { using SafeMath for uint256 ;
     bool public annuityforsale;
     bool public annuityjustcreated;
 
-    // use to payout to the owner the full value of the bid upon sale.
-    // necessary due to beneficiary being the old owner after sale tran
+    // use to payout to the owner the full value of the bid upon sale - less commission of trade platform.
+    // necessary due to beneficiary being the old owner after sale transaction complete and
 
     address payable public beneficiaryowner;
 
