@@ -2,11 +2,11 @@ pragma solidity >=0.4.22 <0.6.0;
 
 contract askbidpayable { using SafeMath for uint256 ;
 
-   //  Version 0.4.4- 03/04/2020 flattened.
+   //  Version 0.4.5- 03/04/2020 flattened.
 
     /*
-    Ethereum in mem/ganache dev/testing and ETH
-    Then for Hedera with HBAR then for deploy to testnet.
+
+    Unit tested - on V 1. .. ready for Hedera deploy to testnet.
 
     ETH and denominations are treated as HBAR in Hedera's EVM version scVM
     global variables in solidity ie block.timestamp is the Hedera consensus timestamp
