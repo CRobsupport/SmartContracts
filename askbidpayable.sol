@@ -2,7 +2,7 @@ pragma solidity >=0.4.22 <0.6.0;
 
 contract askbidpayable { using SafeMath for uint256 ;
 
-   //  Version 0.4.1- 03/02/2020 flattened.
+   //  Version 0.4.2- 03/02/2020 flattened.
 
     /*
     Ethereum in mem/ganache dev/testing and ETH
@@ -122,6 +122,7 @@ contract askbidpayable { using SafeMath for uint256 ;
     // The creator/owner  must mark for sale ie call that function after creation to be open to bids
     // The annuity must then be loaded with hard value ETH above ask value
     // The markforsale function call then sets status
+    // example IPFS hash - assume a link to a binding legal document for this Annunity  QmTfCejgo2wTwqnDJs8Lu1pCNeCrCDuE4GAwkna93zdd7d
 
     constructor(string memory _annuityname, bytes32 _hashlink_to_IPFS_legeldocs, address payable _beneficiaryowner, uint _initalETHaskvalue, uint _payoutyearterm, uint _platform_commission_rate) public {
         annuityforsale = false;
@@ -155,7 +156,7 @@ contract askbidpayable { using SafeMath for uint256 ;
        event annuity_matured(address contractaddress, uint payoutleft);
        event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-       // to make these mods consistent  
+       // to make these mods consistent
 
         modifier commissionisdue() {
             require (commissiondue(), "Cannot send commssion to platform if no sale event");
