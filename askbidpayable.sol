@@ -2,7 +2,7 @@ pragma solidity >=0.4.22 <0.6.0;
 
 contract askbidpayable { using SafeMath for uint256 ;
 
-   //  Version 0.4.2- 03/02/2020 flattened.
+   //  Version 0.4.4- 03/04/2020 flattened.
 
     /*
     Ethereum in mem/ganache dev/testing and ETH
@@ -94,18 +94,24 @@ contract askbidpayable { using SafeMath for uint256 ;
     string public annuityname;
     address public annuitycontractaddress;
     bytes32 public ipfshashlink_legaldocs;
-    address private platformaddress;
+
     uint public annuityvalueETH;
     uint public onthdate_ofnewpaymentschedule;
     uint public monthlypayoutamount;
-    uint public payout_term;
+    uint public payout_term_months;
     uint public payout_monthsleft;
     uint public newaskprice;
     uint public askvalueETH;
     bool public annuitymatured;
     bool public sellerwithdrawnfunds;
     bool public commissiontaken;
+    uint public commission_sum;
+
+    // Commission rate % for each trade will be paid to Platform Wallet at time of successful bid
+    // Commission sum will come from the sellers sale funds
+
     uint public commissionrate;
+    address payable public platformaddress;
 
     // Current state of the trading state -public so all can see - market tranparancey
 
@@ -124,20 +130,20 @@ contract askbidpayable { using SafeMath for uint256 ;
     // The markforsale function call then sets status
     // example IPFS hash - assume a link to a binding legal document for this Annunity  QmTfCejgo2wTwqnDJs8Lu1pCNeCrCDuE4GAwkna93zdd7d
 
-    constructor(string memory _annuityname, bytes32 _hashlink_to_IPFS_legeldocs, address payable _beneficiaryowner, uint _initalETHaskvalue, uint _payoutyearterm, uint _platform_commission_rate) public {
+    constructor(string memory _annuityname, bytes32 _hashlink_to_IPFS_legaldocs, address payable _beneficiaryowner, uint _initalETHaskvalue, uint _payout_years_term, uint _platform_commission_rate_percent, address payable _tanzletrade_wallet_address) public {
         annuityforsale = false;
         annuityjustcreated = true;
         commissiontaken =  true;
-        commissionrate = _platform_commission_rate;
-        ipfshashlink_legaldocs = _hashlink_to_IPFS_legeldocs;
+        commissionrate = _platform_commission_rate_percent;
+        ipfshashlink_legaldocs = _hashlink_to_IPFS_legaldocs;
         annuityname = _annuityname;
         annuitycontractaddress = address(this);
         askvalueETH = _initalETHaskvalue*10**18 ;
         beneficiaryowner = _beneficiaryowner;
         owner = msg.sender;
-        platformaddress = msg.sender;
-        payout_term = _payoutyearterm;
-        payout_monthsleft = payout_term.mul(12);
+        platformaddress = _tanzletrade_wallet_address;
+        payout_term_months = _payout_years_term.mul(12);
+        payout_monthsleft = payout_monthsleft;
         annuitymatured = false;
         sellerwithdrawnfunds = true;
         emit annuitycreated(annuitycontractaddress);
@@ -233,9 +239,6 @@ contract askbidpayable { using SafeMath for uint256 ;
             return msg.sender != owner;
         }
 
-        /**  Standard code o/src for contract owner handling/ can import **
-         * @dev Returns true if the caller is the current owner.
-         */
         function isOwner() public view returns (bool) {
             return msg.sender == owner;
         }
@@ -289,7 +292,7 @@ contract askbidpayable { using SafeMath for uint256 ;
 
             annuityjustcreated = false;
             annuityvalueETH = address(this).balance;
-            monthlypayoutamount = annuityvalueETH.div(payout_term);
+            monthlypayoutamount = annuityvalueETH.div(payout_term_months);
             onthdate_ofnewpaymentschedule = now;
 
         }
@@ -352,7 +355,7 @@ contract askbidpayable { using SafeMath for uint256 ;
          and immediate first month payout for buying annuity
          is available for withdrawl by new owner ie bidder.
 
-          depends on terms.. e.g.  annuity TERMS of PAYOUTS over 3 years
+         e.g.  annuity TERMS of PAYOUTS over the terms in years of _payoutyearterm
 
          If the bid is not same or higher than ask send the ETH back
         */
@@ -388,14 +391,15 @@ contract askbidpayable { using SafeMath for uint256 ;
                    // sets new montly payment to new owner  msg.balance/term
                    // Buyer can withdraw EVEN if seller fails to withdraw the bid value
 
-                   monthlypayoutamount = msg.value.div(payout_term);
-                    // resets payment term to 35 months left
+                   monthlypayoutamount = msg.value.div(payout_term_months);
+                    // resets payment term to smaller amount over reset of payout_term in months
 
-                   ownerwithdrawfirstpayment();
+
 
                    commissiontaken = false;
-                   platformwithdraw();  // commission
+                   platformwithdraw();  // commission due
 
+                   ownerwithdrawfirstpayment();
 
                    emit annuitybidsuccessful(msg.sender);
                    emit Buyersbid_availableforwithdrawl(soldfromaddress, msg.value);
@@ -447,9 +451,15 @@ contract askbidpayable { using SafeMath for uint256 ;
 
      function platformwithdraw() public commissionisdue commissionnotaken {
 
-         //  send commission rate of askvalueETH and send to platformaddress
+         //  send commission rate % of askvalueETH and send to platformaddress
 
-         commissiontaken = true ;
+        commissiontaken = true ;
+        commission_sum = askvalueETH.mul(commissionrate);
+        commission_sum = commission_sum.div(100);
+        askvalueETH = askvalueETH.sub(commission_sum);
+
+        platformaddress.transfer(commission_sum);
+
      }
 
 
@@ -484,9 +494,9 @@ contract askbidpayable { using SafeMath for uint256 ;
 
                 // pay the monthly payout  ETH held balance deducted of course.
 
-                payout_term = payout_term.sub(1);
+                payout_term_months = payout_term_months.sub(1);
 
-                if (payout_term == 0) {
+                if (payout_term_months == 0) {
                     // last payment
                     annuitymatured = true;
                     annuityforsale = false;
