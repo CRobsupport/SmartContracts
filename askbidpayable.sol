@@ -2,7 +2,7 @@ pragma solidity >=0.4.22 <0.6.0;
 
 contract askbidpayable { using SafeMath for uint256 ;
 
-   //  Version 0.4.6- 03/04/2020 flattened.
+   //  Version 0.4.8- 03/04/2020 flattened.
 
     /*
 
