@@ -98,7 +98,7 @@ contract askbidpayable { using SafeMath for uint256 ;
 
     string public annuityname;
     address public annuitycontractaddress;
-    bytes32 public ipfshashlink_legaldocs;
+    string public ipfshashlink_legaldocs;
 
     uint public annuityvalueETH;
     uint public onthdate_ofnewpaymentschedule;
@@ -135,7 +135,7 @@ contract askbidpayable { using SafeMath for uint256 ;
     // The markforsale function call then sets status
     // example IPFS hash - assume a link to a binding legal document for this Annunity  QmTfCejgo2wTwqnDJs8Lu1pCNeCrCDuE4GAwkna93zdd7d
 
-    constructor(string memory _annuityname, bytes32 _hashlink_to_IPFS_legaldocs, address payable _beneficiaryowner, uint _initalETHaskvalue, uint _payout_years_term, uint _platform_commission_rate_percent, address payable _tanzletrade_wallet_address) public {
+    constructor(string memory _annuityname, address payable _beneficiaryowner, string memory _hashlink_to_IPFS_legaldocs,  uint _initalETHaskvalue, uint _payout_years_term, uint _platform_commission_rate_percent, address payable _tanzletrade_wallet_address) public {
         annuityforsale = false;
         annuityjustcreated = true;
         commissiontaken =  true;
@@ -148,7 +148,7 @@ contract askbidpayable { using SafeMath for uint256 ;
         owner = msg.sender;
         platformaddress = _tanzletrade_wallet_address;
         payout_term_months = _payout_years_term.mul(12);
-        payout_monthsleft = payout_monthsleft;
+        payout_monthsleft = payout_term_months;
         annuitymatured = false;
         sellerwithdrawnfunds = true;
         emit annuitycreated(annuitycontractaddress);
@@ -283,8 +283,8 @@ contract askbidpayable { using SafeMath for uint256 ;
 
         }
 
-    function updateIPFS_hashlink(bytes32 _newhashlink) public onlyOwner currnotforsalestatus {
-        require(_newhashlink.length > 0 , "Hash Link cannot be empty");
+    function updateIPFS_hashlink(string memory _newhashlink) public onlyOwner currnotforsalestatus {
+        //require(_newhashlink.length > 0 , "Hash Link cannot be empty");
         ipfshashlink_legaldocs = _newhashlink;
     }
 
