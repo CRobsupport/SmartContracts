@@ -2,7 +2,7 @@ pragma solidity >=0.4.22 <0.6.0;
 
 contract askbidpayable { using SafeMath for uint256 ;
 
-   //  Version 0.4.8- 03/04/2020 flattened.
+   //  Version 0.5.0- 03/06/2020 flattened.
 
     /*
 
@@ -134,6 +134,12 @@ contract askbidpayable { using SafeMath for uint256 ;
     // The annuity must then be loaded with hard value ETH above ask value
     // The markforsale function call then sets status
     // example IPFS hash - assume a link to a binding legal document for this Annunity  QmTfCejgo2wTwqnDJs8Lu1pCNeCrCDuE4GAwkna93zdd7d
+    // IPFS hash is 34 bytes  - store as string for this sample.- refine for ultr low gas costs - phase II.
+
+    // to ..put and get a file from IPFS - & daemon must be installed.
+    // ipfs cat Qmd4PvCKbFbbB8krxajCSeHdLXQamdt7yFxFxzTbedwiYM
+    // curl https://ipfs.io/ipfs/Qmd4PvCKbFbbB8krxajCSeHdLXQamdt7yFxFxzTbedwiYM
+
 
     constructor(string memory _annuityname, address payable _beneficiaryowner, string memory _hashlink_to_IPFS_legaldocs,  uint _initalETHaskvalue, uint _payout_years_term, uint _platform_commission_rate_percent, address payable _tanzletrade_wallet_address) public {
         annuityforsale = false;
@@ -167,12 +173,12 @@ contract askbidpayable { using SafeMath for uint256 ;
        event annuity_matured(address contractaddress, uint payoutleft);
        event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-       // to make these mods consistent
-
         modifier commissionisdue() {
             require (commissiondue(), "Cannot send commssion to platform if no sale event");
             _;
         }
+
+        // to make these mods more consistent with meu1pCNeCrCDuE4GAwkna93zdd7dthod returns.
 
         modifier commissionnotaken() {
             require ((commissiontaken == false), "Cannot send commission more than once for a sale!");
@@ -201,7 +207,7 @@ contract askbidpayable { using SafeMath for uint256 ;
         }
 
           modifier currforsalestatus() {
-            require((annuityforsale == false), "annuity status is already marked for Sale by Owner");
+            require((annuityforsale == false), "Annuity status is marked for Sale by Owner, no montly payment withdraws permitted while on market");
             _;
         }
 
@@ -220,10 +226,10 @@ contract askbidpayable { using SafeMath for uint256 ;
             _;
         }
 
-       // depends on time format and how scVM sees the keyword 'now' .. TBD
+       // depends on time format and how the scVM sees the keyword 'now' .. TBD
 
         modifier onlypermonth() {
-             require(now > (onthdate_ofnewpaymentschedule+30 days), "Can only withdraw every month from purchase date");
+             require(now > (onthdate_ofnewpaymentschedule+30 days), "Can only withdraw >30 days from last monthly payout or initial purchase date payment");
                   _;
         }
 
@@ -238,7 +244,6 @@ contract askbidpayable { using SafeMath for uint256 ;
          function isseller() public view returns (bool) {
             return msg.sender == soldfromaddress;
         }
-
 
         function isnotOwner() public view returns (bool) {
             return msg.sender != owner;
@@ -259,6 +264,7 @@ contract askbidpayable { using SafeMath for uint256 ;
          * NOTE: Renouncing ownership will leave the contract without an owner,
          * thereby removing any functionality that is only available to the owner.
          */
+
         function renounceOwnership() public onlyOwner {
             emit OwnershipTransferred(owner, address(0));
             owner = address(0);
@@ -283,8 +289,12 @@ contract askbidpayable { using SafeMath for uint256 ;
 
         }
 
+    // Only the owner can update the legally bound document copies on IPFS to this Annunity contract
+    // and thus publicly linkable and display by any bidding entity
+
     function updateIPFS_hashlink(string memory _newhashlink) public onlyOwner currnotforsalestatus {
-        //require(_newhashlink.length > 0 , "Hash Link cannot be empty");
+        bytes memory tempEmptyStringTest = bytes(_newhashlink);
+        require(tempEmptyStringTest.length >0 , "Hash Link cannot be empty");
         ipfshashlink_legaldocs = _newhashlink;
     }
 
@@ -329,7 +339,7 @@ contract askbidpayable { using SafeMath for uint256 ;
 
       function ask(uint _askprice) public onlyOwner onlyforsalestatus {
           newaskprice = _askprice * 10**18;
-            require(newaskprice <= address(this).balance ,"Asking ETH price cannot be more than current value of annuity in ETH");
+          require(newaskprice <= address(this).balance ,"Asking ETH price cannot be more than current value of annuity in ETH");
           askvalueETH = newaskprice;
 
 
@@ -454,7 +464,7 @@ contract askbidpayable { using SafeMath for uint256 ;
 
         }
 
-     function platformwithdraw() public commissionisdue commissionnotaken {
+     function platformwithdraw() private commissionisdue commissionnotaken {
 
          //  send commission rate % of askvalueETH and send to platformaddress
 
@@ -469,7 +479,7 @@ contract askbidpayable { using SafeMath for uint256 ;
 
 
 
-     function ownerwithdrawfirstpayment() public onlyOwner currforsalestatus {
+     function ownerwithdrawfirstpayment() private onlyOwner currforsalestatus {
 
 
                 payout_monthsleft = payout_monthsleft.sub(1);
