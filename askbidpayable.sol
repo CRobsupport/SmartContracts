@@ -2,7 +2,7 @@ pragma solidity >=0.4.22 <0.6.0;
 
 contract askbidpayable { using SafeMath for uint256 ;
 
-   //  Version 0.5.0- 03/06/2020 flattened.
+   //  Version 1.1.0 - 03/06/2020 flattened.
 
     /*
 
@@ -529,13 +529,7 @@ contract askbidpayable { using SafeMath for uint256 ;
                 emit Buyers_monthly_payment_paidout(msg.sender, monthlypayoutamount);
 
 
-
         }
-
-     // additional function can be set with a Oraclize call every ie a oraclized Clock triugger to pay monthly sums to owner
-
-
-
 
 
 }
