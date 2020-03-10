@@ -19,6 +19,7 @@ contract SafeAssetPurchase {
 
     address public owner;
     // record of seller after sale.- for audit
+
     address public soldfromaddress;
 
     // publicly exposed data of asset value, asking value, date of new monthly payment, monthly payout amount
@@ -40,28 +41,16 @@ contract SafeAssetPurchase {
     bool public commissiontaken;
     uint public commission_sum;
 
-    // Commission rate % for each trade will be paid to Platform Wallet at time of successful bid
-    // Commission sum will come from the sellers sale funds
+    // Commission rate % upon successful sale will be paid to Platform Wallet
+
 
     uint public commissionrate;
     address payable public platformaddress;
-
-    // Current state of the trading state -public so all can see - market tranparancey
-
     uint public valueethbid;
     address payable public highestBidder;
     uint public highestBid;
 
-
-    // Payable fallback function is not enabled - this contract cannot accept ETH without a call specifically
-    // to the initial load the asset action and the bid function.
-    // For this example asset creator is the owner - not true in reality - why would you create a note for sale at discount
-    // with fund you presently own..  but assume for this example.
-
-    // The creator/owner  must mark for sale ie call that function after creation to be open to bids
-    // The asset must then be loaded with hard value ETH above ask value
-    // The markforsale function call then sets status
-    // example IPFS hash - assume a link to a binding legal document for this Annunity  QmTfCejgo2wTwqnDJs8Lu1pCNeCrCDuE4GAwkna93zdd7d
+    // Example IPFS hash - assume a link to a binding legal document for this Annunity  QmTfCejgo2wTwqnDJs8Lu1pCNeCrCDuE4GAwkna93zdd7d
     // IPFS hash is 34 bytes  - store as string for this sample.- refine for ultr low gas costs - phase II.
 
     // to ..put and get a file from IPFS - & daemon must be installed.
@@ -88,8 +77,6 @@ contract SafeAssetPurchase {
 
     }
 
-         // Events and modifiers only here..
-
        event assetcreated(address contractaddress);
        event asset_buy_HBARS_returned(address bidder, uint bidvalue);
        event asset_purchase_successful(address bidder);
@@ -101,8 +88,6 @@ contract SafeAssetPurchase {
             require (commissiondue(), "Cannot send commssion to platform if no sale has occured yet");
             _;
         }
-
-        // to make these mods more consistent with meu1pCNeCrCDuE4GAwkna93zdd7dthod returns.
 
         modifier commissionnotaken() {
             require ((commissiontaken == false), "Cannot send commission more than once for this contract");
@@ -171,30 +156,11 @@ contract SafeAssetPurchase {
             return soldfromaddress != address(0);
         }
 
-        /**
-         * @dev Leaves the contract without owner. It will not be possible to call
-         * `onlyOwner` functions anymore. Can only be called by the current owner.
-         *
-         * NOTE: Renouncing ownership will leave the contract without an owner,
-         * thereby removing any functionality that is only available to the owner.
-         */
-
         function renounceOwnership() public onlyOwner {
             emit OwnershipTransferred(owner, address(0));
             owner = address(0);
         }
 
-        /**
-         * @dev Transfers ownership of the contract to a newasset account (`newOwner`).
-         * Can only be called by the current owner.
-         */
-        function transferOwnership(address _newOwner) public onlyOwner {
-            _transferOwnership(_newOwner);
-        }
-
-        /**
-         * @dev Transfers ownership of the contract to a new account (`newOwner`).
-         */
         function _transferOwnership(address _newOwner) internal {
             require(_newOwner != address(0), "Ownable: new owner is the zero address");
 
@@ -203,8 +169,8 @@ contract SafeAssetPurchase {
 
         }
 
-    // Only the owner can update the legally bound document copies on IPFS to this Annunity contract
-    // and thus publicly linkable and display by any bidding entity
+    // Only the owner can update the legally bound document copies on IPFS/Hedera FileService to this Annunity contract
+    // and thus publicly linkable and display by any interested purchasing Entity
 
     function update_docs_link(string memory _newhashlink) public onlyOwner currnotforsalestatus {
         bytes memory tempEmptyStringTest = bytes(_newhashlink);
@@ -212,9 +178,6 @@ contract SafeAssetPurchase {
         ipfshashlink_legaldocs = _newhashlink;
     }
 
-
-
-      // For the current owner to rescind the sale..
 
     function withdrawsale() public onlyOwner onlyforsalestatus {
         assetforsale = false;
@@ -273,9 +236,7 @@ contract SafeAssetPurchase {
 
         function sellerwithdrawfunds() public onlysuccessfulseller {
 
-         // only prevowner can withdraw even as newowner is successful bidder
-
-         // check flags and set new owner (successful bidder) and send ETH to seller
+         // only prevowner can withdraw HBAR sale funds.
 
 
                 beneficiaryowner.transfer(highestBid);
