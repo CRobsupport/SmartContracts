@@ -106,12 +106,12 @@ contract SafeAssetPurchase {
         }
 
           modifier currforsalestatus() {
-            require((assetforsale == false), "asset status is marked for Sale by Owner, no montly payment withdraws permitted while on market");
+            require((assetforsale == false), "Asset status is marked for Sale by Owner, no montly payment withdraws permitted while on market");
             _;
         }
 
          modifier currnotforsalestatus() {
-            require(isnotforsale(),"asset must NOT be for currently sale for Owner to sell it");
+            require(isnotforsale(),"Asset must NOT be for currently sale for Owner to sell it");
                _;
             }
 
@@ -125,12 +125,6 @@ contract SafeAssetPurchase {
             _;
         }
 
-       // depends on time format and how the scVM sees the keyword 'now' .. TBD
-
-        modifier onlypermonth() {
-             require(now > (onthdate_ofnewpaymentschedule+30 days), "Can only withdraw >30 days from last monthly payout or initial purchase date payment");
-                  _;
-        }
 
         function isforsale() public view returns (bool) {
             return assetforsale == true;
