@@ -30,10 +30,6 @@ contract SafeAssetPurchase {
     string public ipfshashlink_legaldocs;
 
     uint public assetvalue_in_HBAR_heldin_contract;
-    uint public onthdate_ofnewpaymentschedule;
-    uint public monthlypayoutamount;
-    uint public payout_term_months;
-    uint public payout_monthsleft;
     uint public newaskprice;
     uint public askvalueHBAR;
     bool public sellerwithdrawnfunds;
