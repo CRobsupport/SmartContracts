@@ -29,14 +29,13 @@ contract SafeAssetPurchase {
     address public assetcontractaddress;
     string public ipfshashlink_legaldocs;
 
-    uint public assetvalueHBAR;
+    uint public assetvalue_in_HBAR_heldin_contract;
     uint public onthdate_ofnewpaymentschedule;
     uint public monthlypayoutamount;
     uint public payout_term_months;
     uint public payout_monthsleft;
     uint public newaskprice;
     uint public askvalueHBAR;
-    bool public assetmatured;
     bool public sellerwithdrawnfunds;
     bool public commissiontaken;
     uint public commission_sum;
@@ -46,9 +45,6 @@ contract SafeAssetPurchase {
 
     uint public commissionrate;
     address payable public platformaddress;
-    uint public valueethbid;
-    address payable public highestBidder;
-    uint public highestBid;
 
     // Example IPFS hash - assume a link to a binding legal document for this Annunity  QmTfCejgo2wTwqnDJs8Lu1pCNeCrCDuE4GAwkna93zdd7d
     // IPFS hash is 34 bytes  - store as string for this sample.- refine for ultr low gas costs - phase II.
@@ -61,7 +57,7 @@ contract SafeAssetPurchase {
     constructor(string memory _assetname, address payable _beneficiary_owner_ofasset_sale,  string memory _hashlink_to_IPFS_legaldocs,  uint _inital_HBAR_askvalue,  uint _platform_commission_rate_percent, address payable _tanzletrade_wallet_address) public {
         assetforsale = true;
         assetjustcreated = true;
-        commissiontaken =  true;
+        commissiontaken =  false;
         commissionrate = _platform_commission_rate_percent;
         ipfshashlink_legaldocs = _hashlink_to_IPFS_legaldocs;
         assetname = _assetname;
@@ -70,8 +66,6 @@ contract SafeAssetPurchase {
         beneficiaryowner = _beneficiary_owner_ofasset_sale;
         owner = msg.sender;
         platformaddress = _tanzletrade_wallet_address;
-
-        assetmatured = false;
         sellerwithdrawnfunds = true;
         emit assetcreated(assetcontractaddress);
 
@@ -186,7 +180,6 @@ contract SafeAssetPurchase {
 
       function buy_asset() public payable onlyforsalestatus notowner{
 
-        valueethbid = msg.value;
 
         require(msg.value !=0,"HBAR bid cannot be zero");
 
@@ -203,9 +196,7 @@ contract SafeAssetPurchase {
                    soldfromaddress = owner;
                    sellerwithdrawnfunds = false;
                    owner = msg.sender;
-                   assetvalueHBAR = address(this).balance;
-
-                   commissiontaken = false;
+                   assetvalue_in_HBAR_heldin_contract = address(this).balance;
                    commission_withdraw();  // commission due
 
                    emit asset_purchase_successful(msg.sender);
@@ -230,19 +221,17 @@ contract SafeAssetPurchase {
 
         function sellerwithdrawfunds() public onlysuccessfulseller {
 
-         // only prevowner can withdraw HBAR sale funds.
+         // only prevowner can withdraw HBAR sale funds.. less than the commission -taken first
 
 
-                beneficiaryowner.transfer(highestBid);
-                highestBid = 0;
-                highestBidder = address(0);
+                beneficiaryowner.transfer(address(this).balance);
                 soldfromaddress = address(0);
                 beneficiaryowner = address(0);
                 askvalueHBAR = 0;
-                assetvalueHBAR = address(this).balance;
+                assetvalue_in_HBAR_heldin_contract = address(this).balance;
 
                 sellerwithdrawnfunds = true;
-                emit Sellerwithrawnfunds_ok(beneficiaryowner, highestBid);
+                emit Sellerwithrawnfunds_ok(beneficiaryowner, address(this).balance);
 
 
 
