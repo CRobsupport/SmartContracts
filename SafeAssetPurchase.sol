@@ -28,13 +28,13 @@ contract SafeAssetPurchase {
     address public assetcontractaddress;
     string public ipfshashlink_legaldocs;
 
-    uint public assetvalueETH;
+    uint public assetvalueHBAR;
     uint public onthdate_ofnewpaymentschedule;
     uint public monthlypayoutamount;
     uint public payout_term_months;
     uint public payout_monthsleft;
     uint public newaskprice;
-    uint public askvalueETH;
+    uint public askvalueHBAR;
     bool public assetmatured;
     bool public sellerwithdrawnfunds;
     bool public commissiontaken;
@@ -77,12 +77,11 @@ contract SafeAssetPurchase {
         ipfshashlink_legaldocs = _hashlink_to_IPFS_legaldocs;
         assetname = _assetname;
         assetcontractaddress = address(this);
-        askvalueETH = _inital_HBAR_askvalue*10**18 ;
+        askvalueHBAR = _inital_HBAR_askvalue*10**18 ;
         beneficiaryowner = _beneficiary_owner_ofasset_sale;
         owner = msg.sender;
         platformaddress = _tanzletrade_wallet_address;
-        payout_term_months = _payout_years_term.mul(12);
-        payout_monthsleft = payout_term_months;
+
         assetmatured = false;
         sellerwithdrawnfunds = true;
         emit assetcreated(assetcontractaddress);
@@ -92,8 +91,8 @@ contract SafeAssetPurchase {
          // Events and modifiers only here..
 
        event assetcreated(address contractaddress);
-       event assetbidreturned(address bidder, uint bidvalue);
-       event assetbidsuccessful(address bidder);
+       event asset_buy_HBARS_returned(address bidder, uint bidvalue);
+       event asset_purchase_successful(address bidder);
        event assetbidhighest(address highestbidder, uint bidvalue);
        event Sellerwithrawnfunds_ok(address benowner, uint highbid);
        event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -221,10 +220,10 @@ contract SafeAssetPurchase {
         assetforsale = false;
         }
 
-     // only the Owner can repeatedly call and change the ask price
+     // only the Seller (contract opwner ie Asset owner) can call and change the selling price
 
       function setnew_ask_price(uint _askprice) public onlyOwner onlyforsalestatus {
-          askvalueHBARS = _askprice * 10**18;
+          askvalueHBAR = _askprice * 10**18;
         }
 
 
@@ -235,9 +234,9 @@ contract SafeAssetPurchase {
         require(msg.value !=0,"HBAR bid cannot be zero");
 
 
-        //  Winning bid at or over ask
+        //  Successful purchase
 
-        if ( msg.value >= askvalueETH) {
+        if ( msg.value >= askvalueHBAR) {
 
 
         // set flags status for asset sold and payouts readies to seller
@@ -247,32 +246,22 @@ contract SafeAssetPurchase {
                    soldfromaddress = owner;
                    sellerwithdrawnfunds = false;
                    owner = msg.sender;
-                   assetvalueETH = address(this).balance;
-
-                   // sets new montly payment to new owner  msg.balance/term
-                   // Buyer can withdraw EVEN if seller fails to withdraw the bid value
-
-                   monthlypayoutamount = msg.value.div(payout_term_months);
-                    // resets payment term to smaller amount over reset of payout_term in months
-
-
+                   assetvalueHBAR = address(this).balance;
 
                    commissiontaken = false;
                    commission_withdraw();  // commission due
 
-                   emit assetbidsuccessful(msg.sender);
-                   emit Buyersbid_availableforwithdrawl(soldfromaddress, msg.value);
+                   emit asset_purchase_successful(msg.sender);
+
 
         }
 
-            // else send the bid back to bidder
+            // else send the buyers HBAR back
 
             else {
 
-            //   return the buyers Hbars
-
                 msg.sender.transfer(msg.value);
-                emit assetbidreturned(msg.sender, msg.value);
+                emit asset_buy_HBARS_returned(msg.sender, msg.value);
 
             }
 
@@ -294,8 +283,8 @@ contract SafeAssetPurchase {
                 highestBidder = address(0);
                 soldfromaddress = address(0);
                 beneficiaryowner = address(0);
-                askvalueETH = 0;
-                assetvalueETH = address(this).balance;
+                askvalueHBAR = 0;
+                assetvalueHBAR = address(this).balance;
 
                 sellerwithdrawnfunds = true;
                 emit Sellerwithrawnfunds_ok(beneficiaryowner, highestBid);
@@ -309,9 +298,9 @@ contract SafeAssetPurchase {
          //  send commission rate % of askvalueETH and send to platformaddress
 
         commissiontaken = true ;
-        commission_sum = askvalueETH.mul(commissionrate);
-        commission_sum = commission_sum.div(100);
-        askvalueETH = askvalueETH.sub(commission_sum);
+        commission_sum = askvalueHBAR * commissionrate;
+        commission_sum = commission_sum / 100;
+        askvalueHBAR = askvalueHBAR - commission_sum;
 
         platformaddress.transfer(commission_sum);
 
