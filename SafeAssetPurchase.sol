@@ -2,7 +2,7 @@ pragma solidity >=0.4.22 <0.6.0;
 
 contract SafeAssetPurchase {
 
-   //  Version 0.0.5 - 03/10/2020 flattened.
+   //  Version 0.1.1 - 03/10/2020 flattened.
 
 
     // state locks
@@ -75,7 +75,7 @@ contract SafeAssetPurchase {
        event assetbidhighest(address highestbidder, uint bidvalue);
        event Sellerwithrawnfunds_ok(address benowner, uint highbid);
        event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-       event commission_paid(address platformaddress;)
+       event commission_paid(address platformaddress);
 
        modifier onlysuccessfulseller(){
               require(isseller(), "Caller is not the successfull seller");
