@@ -50,7 +50,7 @@ contract SafeAssetPurchase {
     // curl https://ipfs.io/ipfs/Qmd4PvCKbFbbB8krxajCSeHdLXQamdt7yFxFxzTbedwiYM
 
 
-    constructor(string memory _assetname, address payable _beneficiary_owner_ofasset_sale,  string memory _hashlink_to_IPFS_legaldocs,  uint _inital_HBAR_askvalue,  uint _platform_commission_rate_percent, address payable _tanzletrade_wallet_address) public {
+    constructor(string memory _assetname, address payable _beneficiary_owner_ofasset_sale,  string memory _hashlink_to_IPFS_legaldocs,  uint _inital_HBAR_askvalue,  uint _platform_commission_rate_percent, address payable _tanzletrade_commission_wallet_address) public {
         assetforsale = true;
         assetjustcreated = true;
         commissiontaken =  false;
@@ -61,11 +61,13 @@ contract SafeAssetPurchase {
         askvalueHBAR = _inital_HBAR_askvalue*10**18 ;
         beneficiaryowner = _beneficiary_owner_ofasset_sale;
         owner = msg.sender;
-        platformaddress = _tanzletrade_wallet_address;
+        platformaddress = _tanzletrade_commission_wallet_address;
         sellerwithdrawnfunds = true;
         emit assetcreated(assetcontractaddress);
 
     }
+
+    // Constructor method deploys the instance - Asset ready for sale - set to true.
 
        event assetcreated(address contractaddress);
        event asset_buy_HBARS_returned(address bidder, uint bidvalue);
@@ -73,19 +75,9 @@ contract SafeAssetPurchase {
        event assetbidhighest(address highestbidder, uint bidvalue);
        event Sellerwithrawnfunds_ok(address benowner, uint highbid);
        event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+       event commission_paid(address platformaddress;)
 
-        modifier commissionisdue() {
-            require (commissiondue(), "Cannot send commssion to platform if no sale has occured yet");
-            _;
-        }
-
-        modifier commissionnotaken() {
-            require ((commissiontaken == false), "Cannot send commission more than once for this contract");
-            _;
-        }
-
-
-        modifier onlysuccessfulseller(){
+       modifier onlysuccessfulseller(){
               require(isseller(), "Caller is not the successfull seller");
               _;
         }
@@ -136,9 +128,6 @@ contract SafeAssetPurchase {
             return msg.sender == owner;
         }
 
-        function commissiondue() public view returns (bool) {
-            return soldfromaddress != address(0);
-        }
 
         function renounceOwnership() public onlyOwner {
             emit OwnershipTransferred(owner, address(0));
@@ -233,9 +222,9 @@ contract SafeAssetPurchase {
 
         }
 
-     function commission_withdraw() private commissionisdue commissionnotaken {
+     function commission_withdraw() private {
 
-         //  send commission rate % of askvalueETH and send to platformaddress
+         //  send commission rate % from balance held to the platforms address /wallet.
 
         commissiontaken = true ;
         commission_sum = askvalueHBAR * commissionrate;
@@ -244,6 +233,7 @@ contract SafeAssetPurchase {
 
         platformaddress.transfer(commission_sum);
 
+        emit commission_paid(platformaddress);
          }
 
 
