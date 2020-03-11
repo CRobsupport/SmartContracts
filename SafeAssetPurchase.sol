@@ -88,12 +88,12 @@ contract SafeAssetPurchase {
         }
 
           modifier currforsalestatus() {
-            require((assetforsale == false), "Asset status is marked for Sale by Owner, no montly payment withdraws permitted while on market");
+            require((assetforsale == false), "Asset status is marked for Sale by Owner");
             _;
         }
 
          modifier currnotforsalestatus() {
-            require(isnotforsale(),"Asset must NOT be for currently sale for Owner to sell it");
+            require(isnotforsale(),"Asset must NOT be for current sale for Owner to sell it");
                _;
             }
 
@@ -166,7 +166,7 @@ contract SafeAssetPurchase {
       function buy_asset() public payable onlyforsalestatus notowner{
 
 
-        require(msg.value !=0,"HBAR bid cannot be zero");
+        require(msg.value !=0,"HBAR sent in cannot be zero");
 
 
         //  Successful purchase
@@ -206,8 +206,9 @@ contract SafeAssetPurchase {
 
         function sellerwithdrawfunds() public onlysuccessfulseller {
 
-         // only prevowner can withdraw HBAR sale funds.. less than the commission -taken first
+        // only prevowner can withdraw HBAR sale funds.. less than the commission -taken first
 
+        // the remaining balance of the contract is sent to the seller (ie value less commission already taken at sale)
 
                 beneficiaryowner.transfer(address(this).balance);
                 soldfromaddress = address(0);
