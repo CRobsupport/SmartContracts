@@ -2,7 +2,7 @@ pragma solidity >=0.4.22 <0.6.0;
 
 contract SafeAssetPurchase {
 
-   //  Version 0.1.1 - 03/10/2020 flattened.
+   //  Version 0.2.0 - 03/10/2020 flattened.
 
 
     // state locks
@@ -58,7 +58,7 @@ contract SafeAssetPurchase {
         ipfshashlink_legaldocs = _hashlink_to_IPFS_legaldocs;
         assetname = _assetname;
         assetcontractaddress = address(this);
-        askvalueHBAR = _inital_HBAR_askvalue*10**18 ;
+        askvalueHBAR = _inital_HBAR_askvalue*10**9 ;
         beneficiaryowner = _beneficiary_owner_ofasset_sale;
         owner = msg.sender;
         platformaddress = _tanzletrade_commission_wallet_address;
@@ -66,6 +66,8 @@ contract SafeAssetPurchase {
         emit assetcreated(assetcontractaddress);
 
     }
+
+    //  10*9 for tiny bar to HBAR 100Mtbar = 1 HBAR.  scVM (EVM) functions at wei(tbar) level.
 
     // Constructor method deploys the instance - Asset ready for sale - set to true.
 
@@ -159,7 +161,7 @@ contract SafeAssetPurchase {
      // only the Seller (contract opwner ie Asset owner) can call and change the selling price
 
       function setnew_ask_price(uint _askprice) public onlyOwner onlyforsalestatus {
-          askvalueHBAR = _askprice * 10**18;
+          askvalueHBAR = _askprice * 10**9;
         }
 
 
