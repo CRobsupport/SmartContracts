@@ -58,7 +58,7 @@ contract SafeAssetPurchase {
         ipfshashlink_legaldocs = _hashlink_to_IPFS_legaldocs;
         assetname = _assetname;
         assetcontractaddress = address(this);
-        askvalueHBAR = _inital_HBAR_askvalue*10**9 ;
+        askvalueHBAR = _inital_HBAR_askvalue*10**8 ;
         beneficiaryowner = _beneficiary_owner_ofasset_sale;
         owner = msg.sender;
         platformaddress = _tanzletrade_commission_wallet_address;
@@ -79,10 +79,6 @@ contract SafeAssetPurchase {
        event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
        event commission_paid(address platformaddress);
 
-       modifier onlysuccessfulseller(){
-              require(isseller(), "Caller is not the successfull seller");
-              _;
-        }
 
         modifier onlyforsalestatus() {
             require(isforsale()," Asset must be marked for sale by owner");
@@ -116,10 +112,6 @@ contract SafeAssetPurchase {
 
         function isnotforsale() public view returns (bool) {
             return assetforsale == false;
-        }
-
-         function isseller() public view returns (bool) {
-            return msg.sender == soldfromaddress;
         }
 
         function isnotOwner() public view returns (bool) {
@@ -161,7 +153,7 @@ contract SafeAssetPurchase {
      // only the Seller (contract opwner ie Asset owner) can call and change the selling price
 
       function setnew_ask_price(uint _askprice) public onlyOwner onlyforsalestatus {
-          askvalueHBAR = _askprice * 10**9;
+          askvalueHBAR = _askprice * 10**8;
         }
 
 
@@ -188,6 +180,8 @@ contract SafeAssetPurchase {
 
                    emit asset_purchase_successful(msg.sender);
 
+                   sellerwithdrawfunds();
+
 
         }
 
@@ -206,7 +200,7 @@ contract SafeAssetPurchase {
 
 
 
-        function sellerwithdrawfunds() public onlysuccessfulseller {
+        function sellerwithdrawfunds() private {
 
         // only prevowner can withdraw HBAR sale funds.. less than the commission -taken first
 
@@ -219,7 +213,7 @@ contract SafeAssetPurchase {
                 assetvalue_in_HBAR_heldin_contract = address(this).balance;
 
                 sellerwithdrawnfunds = true;
-                emit Sellerwithrawnfunds_ok(beneficiaryowner, address(this).balance);
+                //emit Sellerwithrawnfunds_ok(beneficiaryowner, address(this).balance);
 
 
 
