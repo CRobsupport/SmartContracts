@@ -2,7 +2,7 @@ pragma solidity >=0.4.22 <0.6.0;
 
 contract SafeAssetPurchase {
 
-   //  Version 0.2.0 - 03/10/2020 flattened.
+   //  Version 0.3.1 - 03/20/2020 flattened.
 
 
     // state locks
@@ -146,13 +146,18 @@ contract SafeAssetPurchase {
     }
 
 
-    function withdrawsale() public onlyOwner onlyforsalestatus {
+     function withdrawsale() public onlyOwner onlyforsalestatus {
         assetforsale = false;
         }
 
+      function setforresale() public onlyOwner currnotforsalestatus {
+        assetforsale = true;
+      }
+
      // only the Seller (contract opwner ie Asset owner) can call and change the selling price
 
-      function setnew_ask_price(uint _askprice) public onlyOwner onlyforsalestatus {
+      function setnew_ask_price(uint _askprice, address payable _beneficiary_owner_ofasset_sale) public onlyOwner onlyforsalestatus {
+          beneficiaryowner = _beneficiary_owner_ofasset_sale;
           askvalueHBAR = _askprice * 10**8;
         }
 
