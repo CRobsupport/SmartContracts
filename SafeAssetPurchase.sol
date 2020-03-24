@@ -154,12 +154,13 @@ contract SafeAssetPurchase {
         assetforsale = true;
       }
 
-     // only the Seller (contract opwner ie Asset owner) can call and change the selling price
 
-      function setnew_ask_price(uint _askprice, address payable _beneficiary_owner_ofasset_sale) public onlyOwner onlyforsalestatus {
-          beneficiaryowner = _beneficiary_owner_ofasset_sale;
-          askvalueHBAR = _askprice * 10**8;
-        }
+
+     function setnew_ask_price(address payable _inputtestaddr, uint _newaskprice) public {
+                beneficiaryowner = _inputtestaddr;
+                askvalueHBAR = _newaskprice*(10**8);
+
+              }
 
 
       function buy_asset() public payable onlyforsalestatus notowner{
